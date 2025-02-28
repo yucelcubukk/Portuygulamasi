@@ -9,34 +9,43 @@ import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
-import { Port } from "../types/portTypes"; // PortList için ortak arayüzü kullan
+import { Port } from "../types/portTypes"; // Ortak Port arayüzü
 
 interface PortListProps {
-  ports: Port[]; // App.tsx içinden gelen port listesini almak için props tanımladık
-  onEdit: (port: Port) => void; // Düzenleme işlemi için gerekli fonksiyon
+  ports: Port[];
+  onEdit: (port: Port) => void;
+  onDelete: (port: Port) => void;
 }
 
-const PortList: React.FC<PortListProps> = ({ ports, onEdit }) => {
-  const [filters, setFilters] = React.useState<{ global: { value: string | null; matchMode: FilterMatchMode } }>({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+const PortList: React.FC<PortListProps> = ({ ports, onEdit, onDelete }) => {
+  const [filters, setFilters] = React.useState<{ global: { value: string; matchMode: FilterMatchMode } }>({
+    global: { value: "", matchMode: FilterMatchMode.CONTAINS }
   });
 
-  // Her satırın yanına "Düzenle" butonu eklemek için fonksiyon
   const actionBodyTemplate = (rowData: Port) => {
     return (
-      <Button 
-        label="Düzenle" 
-        icon="pi pi-pencil" 
-        className="p-button-sm p-button-warning" 
-        onClick={() => onEdit(rowData)} 
-      />
+      <div>
+        <Button 
+          label="Düzenle" 
+          icon="pi pi-pencil" 
+          className="p-button-sm p-button-warning" 
+          onClick={() => onEdit(rowData)} 
+        />
+
+        <Button 
+          label="Sil"
+          icon="pi pi-trash"
+          className="p-button-sm p-button-danger"
+          onClick={() => onDelete(rowData)}
+        />
+      </div>
     );
   };
 
   return (
     <>
       <InputText
-        value={filters.global.value || ""}
+        value={filters.global.value}
         onChange={(e) => setFilters({ ...filters, global: { value: e.target.value, matchMode: FilterMatchMode.CONTAINS } })}
         placeholder="Ara..."
         className="p-inputtext-sm mb-3"
@@ -54,3 +63,4 @@ const PortList: React.FC<PortListProps> = ({ ports, onEdit }) => {
 };
 
 export default PortList;
+

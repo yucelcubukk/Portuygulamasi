@@ -7,11 +7,13 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 import { Port } from "./types/portTypes"; // Port tipi buradan alınıyor
+import { Dialog } from "primereact/dialog";
 
 const App: React.FC = () => {
   const [ports, setPorts] = useState<Port[]>([]);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [editingPort, setEditingPort] = useState<Port | null>(null);
+  const [deletingPort, setDeletingPort ] = useState<Port | null>(null);
 
   const addPort = (newPort: Omit<Port, "id">) => {
     setPorts([...ports, { ...newPort, id: ports.length + 1 }]); // Yeni portu ekle
@@ -21,6 +23,12 @@ const App: React.FC = () => {
   const updatePort = (updatedPort: Port) => {
     setPorts(ports.map((port) => (port.id === updatedPort.id ? updatedPort : port))); // Güncellenen portu listeye ekle
     setEditingPort(null); // Düzenleme işlemi bitti, pencereyi kapat
+  };
+  const deletePort = () => {
+    if (deletingPort) {
+      setPorts(ports.filter((port) => port.id !== deletingPort.id ));
+      setDeletingPort(null);
+    }
   };
 
   return (
@@ -38,8 +46,14 @@ const App: React.FC = () => {
         <PortForm port={editingPort} onUpdatePort={updatePort} visible={!!editingPort} onHide={() => setEditingPort(null)} />
       )}
 
+      <Dialog header="Port Sil " visible={!!deletingPort} onHide= {() => setDeletingPort(null) }  style={{ width: "400px"}} >
+        <p>{deletingPort?.portNumber } numaralı portu silmek istediğinize emin misiniz?  </p>
+        <Button label="Evet" icon="pi pi-check"  onClick={deletePort} className="p-button-danger" />
+        <Button label="Hayır " icon="pi pi-check" onClick={ () => setDeletingPort (null)} className="p-button-secondary" />
+      </Dialog>
+
       {/* Port listesi */}
-      <PortList ports={ports} onEdit={(port) => setEditingPort(port)} />
+      <PortList ports={ports} onEdit={(port) => setEditingPort(port)} onDelete={(port) => setDeletingPort(port)} />
     </div>
   );
 };
