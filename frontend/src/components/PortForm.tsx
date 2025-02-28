@@ -7,13 +7,15 @@ import { Port } from "../types/portTypes"; // Port arayüzünü ortak dosyadan a
 
 // 📌 Props tanımlandı!
 interface PortFormProps {
-  onAddPort: (port: Omit<Port, "id">) => void;
+  port?: Port; // Güncellenen port (opsiyonel)
+  onAddPort?: (port: Omit<Port, "id">) => void;
+  onUpdatePort?: (port: Port) => void;
   visible: boolean;
   onHide: () => void;
 }
 
-const PortForm: React.FC<PortFormProps> = ({ onAddPort, visible, onHide }) => {
-  const initialValues = {
+const PortForm: React.FC<PortFormProps> = ({ port, onAddPort, onUpdatePort, visible, onHide }) => {
+  const initialValues = port || {
     portNumber: "",
     projectName: "",
     applicationName: "",
@@ -28,14 +30,18 @@ const PortForm: React.FC<PortFormProps> = ({ onAddPort, visible, onHide }) => {
   });
 
   return (
-    <Dialog header="Port Ekle" visible={visible} onHide={onHide} style={{ width: "400px" }}>
+    <Dialog header={port ? "Port Güncelle" : "Port Ekle"} visible={visible} onHide={onHide} style={{ width: "400px" }}>
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={(values, { resetForm }) => {
-          onAddPort(values); // 📌 Form verisini App.tsx'e gönderecek!
-          resetForm(); // Formu temizle
-          onHide(); // Formu kapat
+          if (port && onUpdatePort) {
+            onUpdatePort({ ...port, ...values }); // 📌 Güncelleme işlemi
+          } else if (onAddPort) {
+            onAddPort(values); // 📌 Yeni port ekleme işlemi
+          }
+          resetForm();
+          onHide();
         }}
       >
         {({ isSubmitting }) => (
@@ -64,7 +70,12 @@ const PortForm: React.FC<PortFormProps> = ({ onAddPort, visible, onHide }) => {
               <ErrorMessage name="description" component="div" className="p-error" />
             </div>
 
-            <Button type="submit" label="Ekle" className="p-button-primary" disabled={isSubmitting} />
+            <Button 
+              type="submit" 
+              label={port ? "Güncelle" : "Ekle"} 
+              className="p-button-primary" 
+              disabled={isSubmitting} 
+            />
           </Form>
         )}
       </Formik>
