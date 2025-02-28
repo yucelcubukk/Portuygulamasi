@@ -1,60 +1,67 @@
-import React, { useState } from "react";
+import React from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
 
-const PortForm: React.FC = () => {
-    const [ portNumber, setPortNumber ] = useState("");
-    const [ projectName, setProjectName ] = useState("");
-    const [ applicationName, setApplicationName ] = useState("");
-    const [description, setDescription ] = useState("");
+const PortForm: React.FC<{visible: boolean; onHide: () => void  }> = ({ visible, onHide}) => { 
+    const initialValues = {
+        portNumber: "",
+        projectName: "",
+        applicationName: "",
+        description: "",
+    };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        console.log("From Data: ", { portNumber, projectName, applicationName, description });
+    const validationSchema = Yup.object({
+        portNumber: Yup.number()
+              .typeError("Port numarası sayı olmalıdır")
+              .required("Port numarası zorunludur"),
+              projectName: Yup.string().required("Uygulama adı zorunludur"),
+              description: Yup.string()
+    });
 
+
+    const handleSubmit = (values: typeof initialValues) =>{
+        console.log("Form verileri: ", values);
+        onHide();
     };
 
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div>
-                <label>Port Numarası:</label>
-                <input
-                type="text"
-                value={portNumber}
-                onChange={(e) => setPortNumber(e.target.value)}
-                required
-                />
-            </div>
+        <Dialog header="Port Ekle" visible={visible} onHide={onHide} style= {{width: "400px" }}>
+            <Formik initialValues={initialValues} validationSchema={validationSchema}  onSubmit={handleSubmit}>
+                { ( { isSubmitting }) => (
+                    <Form>
+                        <div className="p-field">
+                            <label>Port Numarası: </label>
+                            <Field type="text"  name="portNumber" className="p-inputtext" />
+                            <ErrorMessage name="portNumber"  component="div" className="p-error" />
 
-            <div>
-                <label>Proje Adı:</label>
-                <input
-                type="text"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                required
-                />
-            </div>
+                        </div>
+                        <div className="p-field">
+                            <label>Proje adı:</label>
+                            <Field type="text" name="projectName" className="p-inputtext" />
+                            <ErrorMessage name="projectName" component="div" className="p-error" />  
+                        </div>
 
-            <div>
-                <label>Uygulama Adı:</label>
-                <input 
-                type="text"
-                value={applicationName}
-                onChange={(e) => setApplicationName(e.target.value)}
-                required
-                />
-            </div>
+                        <div className="p-field">
+                        <label>Uygulama Adı:</label>
+                        <Field type="text" name="applicationName" className="p-inputtext" />
+                        <ErrorMessage name="applicationName" component="div" className="p-error" />
+                        </div> 
 
-            <div>
-                <label> Açıklama :</label>
-                <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                />
-            </div>
-            
-            <button type="submit">Ekle</button>
-        </form>
+                        <div className="p-field">
+                            <label>Açıklama:</label>
+                            <Field as="textarea" name="description" className="p-inputtext" />
+                            <ErrorMessage name="description" component="div" className="p-error" />
+                         </div>
+                        <Button type="submit" label="Ekle" className="p-button-primary" disabled={isSubmitting} />
+
+                    </Form>
+                )}
+            </Formik>
+        </Dialog>
+        
     );
 };
 
